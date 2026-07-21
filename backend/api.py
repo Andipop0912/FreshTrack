@@ -14,7 +14,11 @@ from ultralytics import YOLO
 from database import init_db, create_user, verify_user, get_user_by_email, update_user_profile
 
 app = Flask(__name__)
-CORS(app)
+# Allow all origins (good for local development)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Deployment URL - use this for Vercel
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -177,7 +181,7 @@ def handle_upload():
         file.save(file_path)
         
         # 2. IMPLEMENT IMAGE QUEUE (MAX 5)
-        img_url = f"http://127.0.0.1:5000/images/{filename}"
+        img_url = f"{BASE_URL}/images/{filename}"
         
         image_queue.append({
             "filename": filename,
@@ -380,7 +384,7 @@ def get_recommendations():
                 if filename == "MASALA NIMBU SODA.png":
                     filename = "LEMON MASALA SODA.png"
                     
-                selected_img = f"http://127.0.0.1:5000/api/recipe-image/{filename}"
+                selected_img = f"{BASE_URL}/api/recipe-image/{filename}"
                 
                 results.append({
                     "title": recipe['title'],
