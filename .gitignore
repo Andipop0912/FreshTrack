@@ -1,0 +1,49 @@
+# OS Files
+.DS_Store
+Thumbs.db
+*.log
+
+# Python Virtual Environments & Packages
+backend/venv/
+.venv/
+venv/
+ENV/
+
+# Python Cache & Compiled Files
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+
+# Databases
+backend/db/freshtrack.db
+*.db
+*.sqlite3
+
+# Uploaded Scanner Images (Dynamic)
+backend/images/
+backend/images/*
+!backend/images/.gitkeep
+
+# Node / Frontend Dependencies & Builds
+**/node_modules/
+frontend/Webpage/dist/
+frontend/Webpage/build/
+
+# Local Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env*.local
+
+# IDE configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

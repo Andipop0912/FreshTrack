@@ -1,0 +1,58 @@
+# Project Analysis & Incomplete Frontend Review
+
+This document provides a thorough analysis of the **FreshTrack** project, detailing key architectural pain points, UX inconsistencies, and incomplete frontend implementations.
+
+---
+
+## 🔍 Incomplete Frontend Items & Visual Bugs
+
+### 1. Missing Branding on Landing Page Navbar
+* **File**: [Landing.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/pages/Landing.jsx#L25-L27)
+* **Issue**: The brand container inside the landing page navbar is entirely empty:
+  ```html
+  <div className="flex items-center gap-2"></div>
+  ```
+  Users landing on the page see a blank space on the top-left where the application logo and title ("FreshTrack") should be.
+
+### 2. Inconsistent Branding ("The Conservatory" vs "FreshTrack")
+* **Files**: 
+  * [Sidebar.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/components/Sidebar.jsx#L24-L32) (Displays "The Conservatory")
+  * [Login.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/pages/Login.jsx#L151) & [Signup.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/pages/Signup.jsx#L185) (Buttons say "Enter The Conservatory")
+  * [TopNavBar.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/components/TopNavBar.jsx#L19) (Displays "FreshTrack")
+* **Issue**: The app refers to itself interchangeably as "The Conservatory" and "FreshTrack", creating a disjointed user experience.
+
+### 3. Missing Sidebar Navigation for Profile Page
+* **File**: [Sidebar.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/components/Sidebar.jsx#L15-L19)
+* **Issue**: The sidebar includes links for `Home`, `Dashboard`, and `Recipes`, but completely omits the `Profile` page. The only way to access the profile page is by clicking the small user avatar in the top navigation bar, which is non-obvious and poor UX.
+
+### 4. Broken "Quick Meals" Recipe Filter
+* **File**: [Recipes.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/pages/Recipes.jsx#L81-L82)
+* **Issue**: The "Quick Meals" filter is coded to look for recipes with a duration under 10 minutes:
+  ```javascript
+  filtered = filtered.filter(r => parseInt(r.time) < 10);
+  ```
+  However, in the backend recipe bank ([api.py](file:///c:/Projects/FreshTrack-main/backend/api.py#L60-L82)), all recipes (e.g., *Tomato Rasam*, *Lemon Rice*, *Apple Halwa*) have prep times ranging from 15 to 40 minutes. Consequently, selecting this filter always returns 0 results and falls back to showing all recipes.
+
+### 5. Dead Code: Unused Fallback Captures
+* **File**: [Dashboard.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/pages/Dashboard.jsx#L12-L18)
+* **Issue**: The `FALLBACK_CAPTURES` array is defined at the top of the file but is never used anywhere in the component rendering logic.
+
+---
+
+## ⚡ Architectural & Code Pain Points
+
+### 1. Volatile In-Memory Global State (DB Bypass)
+* **Files**: [api.py](file:///c:/Projects/FreshTrack-main/backend/api.py#L34-L43) & [database.py](file:///c:/Projects/FreshTrack-main/backend/database.py)
+* **Issue**: While the database schema has fully implemented `scans` and `detections` tables, the Flask API stores all upload and telemetry state in a volatile in-memory dictionary `latest_result` and list `image_queue`. If the backend restarts, all uploaded images, scanned inventory history, and activity logs are permanently lost.
+
+### 2. Mock Sensor Telemetry on Failure
+* **File**: [Dashboard.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/pages/Dashboard.jsx#L74-L78)
+* **Issue**: When the backend has no data or fails, the dashboard defaults to showing `0°C` temperature and `0%` humidity. A better approach would be to display a loading state, cached data, or an explicit warning.
+
+### 3. Redundant Routing Checks in Layout
+* **File**: [Layout.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/components/Layout.jsx#L9-L14)
+* **Issue**: The conditional routing checks (`isAuthPage || isLandingPage`) in the layout are redundant because these routes are configured outside the main layout route element in `App.jsx`.
+
+### 4. Mixed Authentication States
+* **File**: [Profile.jsx](file:///c:/Projects/FreshTrack-main/frontend/src/pages/Profile.jsx#L69-L73)
+* **Issue**: The `activityFeed` defaults to hardcoded mockup entries ("Spinach detected", "Alert: Milk expiring"). If the database has no activity, users are presented with mock data that does not correspond to their actual inventory.
