@@ -46,16 +46,22 @@ latest_result = {
     "timestamp": None
 }
 
-from ml_engine import FreshTrackEngine
-ml_service = FreshTrackEngine()
+ml_service = None
+
+def get_ml_service():
+    global ml_service
+    if ml_service is None:
+        from ml_engine import FreshTrackEngine
+        ml_service = FreshTrackEngine()
+    return ml_service
 
 def run_ml_pipeline(image_path):
-    """
-    ML Pipeline execution using centralized FreshTrackEngine.
-    """
     temp = 4.0
     humidity = 65.0
-    items = ml_service.analyze_image(image_path, temp, humidity)
+
+    service = get_ml_service()
+    items = service.analyze_image(image_path, temp, humidity)
+
     return items, temp, humidity
 
 # ── INDIAN RECIPE BANK (18 recipes) ───────────────────────
@@ -541,5 +547,11 @@ def seed_demo():
     latest_result["timestamp"] = datetime.datetime.now().isoformat()
     return jsonify({"message": "Demo data seeded!", "data": latest_result})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    import os
+
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False
+    )
